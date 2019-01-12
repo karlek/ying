@@ -1,7 +1,7 @@
 // Local Headers
-#include "kol/shader.hpp"
-#include "kol/camera.hpp"
-#include "kol/model.hpp"
+#include "ying/shader.hpp"
+#include "ying/camera.hpp"
+#include "ying/model.hpp"
 
 // System Headers
 #include <glad/glad.h>
@@ -9,6 +9,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 // Standard Headers
 #include <cstdio>
@@ -107,7 +111,7 @@ int main(int argc, char * argv[]) {
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
-        /* model = glm::scale(model, glm::vec3(0.2f)); */
+        model = glm::scale(model, glm::vec3(0.2f));
         shader.setMat4("model", model);
 
         glStencilFunc(GL_ALWAYS, 1, 0xFF);

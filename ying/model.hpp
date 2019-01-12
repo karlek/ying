@@ -6,8 +6,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "kol/shader.hpp"
-#include "kol/mesh.hpp"
+#include "ying/shader.hpp"
+#include "ying/mesh.hpp"
 
 #include <map>
 #include <string>

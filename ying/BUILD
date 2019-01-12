@@ -1,7 +1,7 @@
 cc_library(
 	name = "camera",
 	hdrs = ["camera.hpp"],
-	include_prefix = "kol",
+	include_prefix = "ying",
 	visibility = ["//main:__pkg__"],
 	deps = [
 		"//third_party/glad",
@@ -13,7 +13,7 @@ cc_library(
 cc_library(
 	name = "mesh",
 	hdrs = ["mesh.hpp"],
-	include_prefix = "kol",
+	include_prefix = "ying",
 	visibility = ["//main:__pkg__"],
 	deps = [
 		":shader",
@@ -27,7 +27,7 @@ cc_library(
 cc_library(
 	name = "model",
 	hdrs = ["model.hpp"],
-	include_prefix = "kol",
+	include_prefix = "ying",
 	visibility = ["//main:__pkg__"],
 	deps = [
 		":shader",
@@ -35,12 +35,13 @@ cc_library(
 
 		"//third_party/stb_image",
 	],
+	linkopts = ['-lassimp'],
 )
 
 cc_library(
 	name = "shader",
 	hdrs = ["shader.hpp"],
-	include_prefix = "kol",
+	include_prefix = "ying",
 	visibility = ["//main:__pkg__"],
 	deps = [
 		"//third_party/glad",
@@ -60,12 +61,14 @@ cc_binary(
 
 		"//third_party/glad",
 		"//third_party/stb_image",
+		"//third_party/imgui",
 
 		"@glm//:glm",
 	],
-	linkopts = ['-lassimp', '-lglfw'],
+	linkopts = ['-lglfw'],
 	data = glob([
 		"shaders/**",
 		"data/**",
 	]),
+    copts = ["-Ithird_party/imgui"],
 )
