@@ -32,14 +32,14 @@ private:
     std::map<std::string, Texture> textures_loaded;
     std::vector<Mesh> meshes;
     std::string directory;
+
     // Functions
     void loadModel(std::string path) {
         Assimp::Importer import;
         const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-            std::cerr << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
-            return;
+			throw std::runtime_error("ASSIMP::" + std::string(import.GetErrorString()));
         }
         directory = path.substr(0, path.find_last_of('/'));
 
@@ -158,8 +158,8 @@ unsigned int TextureFromFile(std::string filename, const std::string &directory,
 
         stbi_image_free(data);
     } else {
-        std::cerr << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
+		throw std::runtime_error("Texture failed to load at path: " + path);
     }
     return textureID;
 }

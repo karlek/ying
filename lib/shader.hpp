@@ -1,6 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+// System Headers
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
@@ -39,8 +40,7 @@ public:
             vertexCode = vShaderStream.str();
             fragmentCode = fShaderStream.str();
         } catch (std::ifstream::failure e) {
-            std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
-            std::cerr << "Error: " << e.code().message() << std::endl;
+			throw std::runtime_error("SHADER::FILE_NOT_SUCCESSFULLY_READ: " + e.code().message());
         }
         const char* vShaderCode = vertexCode.c_str();
         const char* fShaderCode = fragmentCode.c_str();
@@ -123,18 +123,19 @@ private:
         if (type != "PROGRAM") {
             // Print compile errors if any
             glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if (!success) {
-                glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
-                std::cerr << "ERROR::VERTEX::COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+            if (success) {
+				return;
             }
+			glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
+			throw std::runtime_error("VERTEX::COMPILATION_ERROR of type: " + type + " " + std::string(infoLog));
         } else {
             glGetProgramiv(shader, GL_LINK_STATUS, &success);
-            if (!success) {
-                glGetProgramInfoLog(shader, 1024, nullptr, infoLog);
-                std::cerr << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+            if (success) {
+				return;
             }
+			glGetProgramInfoLog(shader, 1024, nullptr, infoLog);
+			throw std::runtime_error("PROGRAM_LINKING_ERROR of type: " + type + " " + std::string(infoLog));
         }
-
     }
 };
 

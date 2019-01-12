@@ -1,0 +1,12 @@
+licenses(["notice"])
+
+cc_library(
+    name = "spdlog",
+    hdrs = glob([
+        "**/*.hpp",
+        "**/*.h",
+        "**/*.inl",
+    ]),
+    include_prefix = "spdlog",
+    visibility = ["//visibility:public"],
+)

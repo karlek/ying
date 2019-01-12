@@ -10,9 +10,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// UI framework
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
+// Logging framework
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 // Standard Headers
 #include <cstdio>
@@ -23,6 +28,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xPos, double yPos);
 void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
 void processInput(GLFWwindow *window);
+void message_callback(GLenum source, GLenum type, GLuint id, GLenum severityType, GLsizei length, const GLchar* message, const void* userParam);
+std::string severity_label(GLenum severityType);
+std::string type_label(GLenum messageType);
 
 // Settings
 const unsigned int SCR_WIDTH = 1280;
@@ -38,7 +46,15 @@ bool firstMouse = true;
 float deltaTime = 0.0f; // Time between current frame and last frame.
 float lastFrame = 0.0f; // Time of last frame.
 
+std::shared_ptr<spdlog::logger> logger = spdlog::stderr_color_mt("stderr");
+void init_logging() {
+    // change log pattern
+    logger->set_pattern("[%^%l%$] %v");
+}
+
 int main(int argc, char * argv[]) {
+	init_logging();
+
     // Load GLFW and Create a Window
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -50,7 +66,7 @@ int main(int argc, char * argv[]) {
 
     // Check for Valid Context
     if (window == nullptr) {
-        fprintf(stderr, "Failed to Create OpenGL Context");
+		logger->error("Failed to create OpenGL context");
         return EXIT_FAILURE;
     }
     // Create Context and Load OpenGL Functions
@@ -61,12 +77,15 @@ int main(int argc, char * argv[]) {
     glfwSetScrollCallback(window, scroll_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
+		logger->error("Failed to initialize GLAD");
         return -1;
     }
-    fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
+	logger->info("OpenGL {}", glGetString(GL_VERSION));
 
     // Configure our global OpenGL space.
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(message_callback, 0);
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_STENCIL_TEST);
@@ -183,4 +202,62 @@ void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
 
 void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
     camera.ProcessMouseScroll(yOffset);
+}
+
+std::string severity_label(GLenum severityType) {
+	switch (severityType) {
+	case GL_DEBUG_SEVERITY_HIGH:
+		return "HIGH";
+    case GL_DEBUG_SEVERITY_MEDIUM:
+		return "MEDIUM";
+    case GL_DEBUG_SEVERITY_LOW:
+		return "LOW";
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+		return "NOTIFICATION";
+	default:
+		return "UNKNOWN";
+	}
+}
+
+std::string type_label(GLenum messageType) {
+	switch (messageType) {
+	case GL_DEBUG_TYPE_ERROR:
+		return "ERROR";
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		return "DEPRECATED_BEHAVIOR";
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		return "UNDEFINED_BEHAVIOR";
+	case GL_DEBUG_TYPE_PORTABILITY:
+		return "PORTABILITY";
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		return "PERFORMANCE";
+	case GL_DEBUG_TYPE_OTHER:
+		return "OTHER";
+	case GL_DEBUG_TYPE_MARKER:
+		return "MARKER";
+	case GL_DEBUG_TYPE_PUSH_GROUP:
+		return "PUSH_GROUP";
+	case GL_DEBUG_TYPE_POP_GROUP:
+		return "POP_GROUP";
+	default:
+		return "UNKNOWN";
+	}
+}
+
+void message_callback(
+	GLenum source,
+	GLenum messageType,
+	GLuint id,
+	GLenum severityType,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam) {
+
+	std::string severity = severity_label(severityType);
+	std::string type = type_label(messageType);
+	if (messageType == GL_DEBUG_TYPE_ERROR) {
+		logger->warn("[{} / {}]: ** GL ERROR **: {}", severity, type, message);
+	} else {
+		logger->info("[{} / {}]: {}", severity, type, message);
+	}
 }
