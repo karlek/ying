@@ -9,9 +9,10 @@ _Visions are reality - Yung Lean_
 ## Build
 
 ```
-$ pacaur -S glfw-x11 glm assimp glibc
+$ pacaur -S glfw-x11 glm assimp glibc spdlog
 # The linkopts used are: '-lglfw', '-lassimp', '-ldl'
 # Since glm does not give us a shared object, we use it straight from `/usr/include/glm`
+# Since spdlog does not give us a shared object, we use it straight from `/usr/include/spdlog`
 
 $ bazel build ying:main
 ```
